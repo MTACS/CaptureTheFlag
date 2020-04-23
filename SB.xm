@@ -1,3 +1,5 @@
+// Just to be safe, still don't understand what causes the actual bug
+
 %hook UILabel
 
 - (void)setText:(NSString *)arg1 {
