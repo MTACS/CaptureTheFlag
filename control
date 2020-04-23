@@ -1,9 +1,9 @@
 Package: com.mtac.ctf
 Name: CaptureTheFlag
 Depends: mobilesubstrate
-Version: 1.0.0
+Version: 1.0.1
 Architecture: iphoneos-arm
-Description: Stop the Italian flag string bug from freezing your device
+Description: Stop the Sindhi string bug from freezing your device
 Maintainer: MTAC
 Author: MTAC
 Section: Tweaks
