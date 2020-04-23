@@ -1,3 +1,5 @@
+// Methods from IneffectivePower by angelXwind
+
 #import <CoreFoundation/CoreFoundation.h>
 #import <CoreText/CoreText.h>
 #import <substrate.h>
