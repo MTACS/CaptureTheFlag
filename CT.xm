@@ -1,20 +1,64 @@
 // Methods from IneffectivePower by angelXwind
+// Made CF-only by PoomSmart because he doesn't trust ARC
 
 #import <CoreFoundation/CoreFoundation.h>
 #import <CoreText/CoreText.h>
 #import <substrate.h>
 
-static CTLineRef (*orig_line)(CFAttributedStringRef string);
-static CTLineRef ineffectify_line(CFAttributedStringRef string) {
-	return ([[(__bridge NSAttributedString*)string string] containsString:@"بٍٍٍٍََُُُِّّّْرٍٍٍٍََُُِِّّّْآٍٍٍَُّ"]) ? orig_line(CFAttributedStringCreate(NULL, (__bridge CFStringRef)[[(__bridge NSAttributedString*)string string] stringByReplacingOccurrencesOfString:@"بٍٍٍٍََُُُِّّّْرٍٍٍٍََُُِِّّّْآٍٍٍَُّ" withString:@"Unsupported characters" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [[(__bridge NSAttributedString*)string string] length])], CFAttributedStringGetAttributes(string, 0, NULL))) : orig_line(string);
+CFStringRef sindhi = CFSTR("بٍٍٍٍََُُُِّّّْرٍٍٍٍََُُِِّّّْآٍٍٍَُّ");
+CFIndex sindhiLength = CFStringGetLength(sindhi); // 37
+CFStringRef replace = CFSTR("Unsupported characters..............."); // length also 37
+
+%hookf(CTLineRef, CTLineCreateWithAttributedString, CFAttributedStringRef attrString) {
+	if (attrString != NULL) {
+		CFStringRef string = CFAttributedStringGetString(attrString);
+		if (string != NULL) {
+			CFIndex stringLength = CFStringGetLength(string);
+			if (stringLength >= sindhiLength) {
+				CFArrayRef targets = CFStringCreateArrayWithFindResults(kCFAllocatorDefault, string, sindhi, CFRangeMake(0, stringLength), kCFCompareCaseInsensitive);
+				if (targets != NULL) {
+					CFMutableAttributedStringRef mutableAttrString = CFAttributedStringCreateMutableCopy(kCFAllocatorDefault, stringLength, attrString);
+					CFIndex size = CFArrayGetCount(targets);
+					CFAttributedStringBeginEditing(mutableAttrString);
+					for (CFIndex i = 0; i < size; ++i) {
+						CFRange *range = (CFRange *)CFArrayGetValueAtIndex(targets, i);
+						CFAttributedStringReplaceString(mutableAttrString, *range, replace);
+					}
+					CFAttributedStringEndEditing(mutableAttrString);
+					CFRelease(targets);
+					return %orig(mutableAttrString);
+				}
+			}
+		}
+	}
+	return %orig(attrString);
 }
 
-static CTFramesetterRef (*orig_frame)(CFAttributedStringRef string);
-static CTFramesetterRef ineffectify_frame(CFAttributedStringRef string) {
-	return ([[(__bridge NSAttributedString*)string string] containsString:@"بٍٍٍٍََُُُِّّّْرٍٍٍٍََُُِِّّّْآٍٍٍَُّ"]) ? orig_frame(CFAttributedStringCreate(NULL, (__bridge CFStringRef)[[(__bridge NSAttributedString*)string string] stringByReplacingOccurrencesOfString:@"بٍٍٍٍََُُُِّّّْرٍٍٍٍََُُِِّّّْآٍٍٍَُّ" withString:@"Unsupported characters" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [[(__bridge NSAttributedString*)string string] length])], CFAttributedStringGetAttributes(string, 0, NULL))) : orig_frame(string);
+%hookf(CTFramesetterRef, CTFramesetterCreateWithAttributedString, CFAttributedStringRef attrString) {
+	if (attrString != NULL) {
+		CFStringRef string = CFAttributedStringGetString(attrString);
+		if (string != NULL) {
+			CFIndex stringLength = CFStringGetLength(string);
+			if (stringLength >= sindhiLength) {
+				CFArrayRef targets = CFStringCreateArrayWithFindResults(kCFAllocatorDefault, string, sindhi, CFRangeMake(0, stringLength), kCFCompareCaseInsensitive);
+				if (targets != NULL) {
+					CFMutableAttributedStringRef mutableAttrString = CFAttributedStringCreateMutableCopy(kCFAllocatorDefault, stringLength, attrString);
+					CFIndex size = CFArrayGetCount(targets);
+					CFAttributedStringBeginEditing(mutableAttrString);
+					for (CFIndex i = 0; i < size; ++i) {
+						CFRange *range = (CFRange *)CFArrayGetValueAtIndex(targets, i);
+						CFAttributedStringReplaceString(mutableAttrString, *range, replace);
+					}
+					CFAttributedStringEndEditing(mutableAttrString);
+					CFRelease(targets);
+					return %orig(mutableAttrString);
+				}
+			}
+		}
+	}
+	return %orig(attrString);
 }
 
 %ctor {
-	MSHookFunction(CTLineCreateWithAttributedString, ineffectify_line, &orig_line);
-	MSHookFunction(CTFramesetterCreateWithAttributedString, ineffectify_frame, &orig_frame);
+	%init;
 }
