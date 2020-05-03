@@ -1,9 +1,9 @@
 Package: com.mtac.ctf
 Name: CaptureTheFlag
 Depends: mobilesubstrate
-Version: 1.0.2
+Version: 1.0.4
 Architecture: iphoneos-arm
-Description: Stop the Sindhi string bug from freezing your device
+Description: Stop CoreText frame buffer bugs on iOS 13
 Maintainer: MTAC
 Author: MTAC
 Section: Tweaks
